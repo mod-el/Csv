@@ -1,5 +1,6 @@
 {
 	"name": "Csv",
 	"description": "Csv import / export utilities",
-	"version": "0.0.1"
+	"version": "0.0.1",
+	"dependencies": {}
 }
