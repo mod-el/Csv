@@ -1,6 +1,5 @@
 <?php namespace Model\Csv;
 
-use Model\AdminFront\DataVisualizer;
 use Model\Core\Core;
 
 class AdminBridge
@@ -12,9 +11,23 @@ class AdminBridge
 		$this->model = $model;
 	}
 
-	public function export($list, DataVisualizer $visualizer, array $options = [])
+	public function export(iterable $list, array $columns, array $options = [])
 	{
-		$columns = $visualizer->getStandardColumns();
-		$this->model->_Csv->export($list, $columns, $options);
+		$generator = $this->makeGenerator($list, $columns);
+		$this->model->_Csv->export($generator, $columns, $options);
+	}
+
+	private function makeGenerator(iterable $list, array $columns): \Generator
+	{
+		foreach ($list as $item) {
+			$row = [];
+
+			foreach ($columns as $columnId => $column) {
+				$itemColumn = $this->model->_Admin->getElementColumn($item['element'], $column);
+				$row[$columnId] = $itemColumn ? $itemColumn['text'] : '';
+			}
+
+			yield $row;
+		}
 	}
 }

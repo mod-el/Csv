@@ -4,7 +4,7 @@ use Model\Core\Module;
 
 class Csv extends Module
 {
-	public function export($list, array $columns, array $options = [])
+	public function export(iterable $list, array $columns, array $options = [])
 	{
 		$options = array_merge([
 			'target' => 'php://output',
@@ -18,21 +18,16 @@ class Csv extends Module
 
 		if ($options['header']) {
 			$row = [];
-			foreach ($columns as $label => $c)
-				$row[] = $label;
+			foreach ($columns as $column)
+				$row[] = $column['label'];
 
 			fputcsv($f, $row, $options['delimiter'], $options['enclosure']);
 		}
 
-		foreach ($list as $element) {
-			$form = $element->getForm();
+		foreach ($list as $item) {
 			$row = [];
-			foreach ($columns as $label => $c) {
-				if (!is_string($c) and is_callable($c)) {
-					$value = call_user_func($c, $element);
-				} else {
-					$value = isset($form[$c]) ? $form[$c]->getText() : $element[$c];
-				}
+			foreach ($columns as $columnId => $column) {
+				$value = $item[$columnId] ?? '';
 				if ($options['charset'] !== 'UTF-8')
 					$value = iconv('UTF-8', $options['charset'] . '//TRANSLIT', $value);
 				$row[] = $value;
